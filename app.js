@@ -1,14 +1,20 @@
 const Discord = require("discord.js");
 const config = require("./config.json");
+const Datastore = require('nedb')
+  , db = new Datastore({ filename: 'wallet.db', autoload: true });
 
 const client = new Discord.Client();
 
 const prefix = "!";
 const blobCost = 17;
-let wallet = 0;
 
 
 client.on("message", function(message) {
+    let wallet;
+
+    db.find({_id: 'id1'}, (err, docs) => {
+        wallet = docs.balance;
+    })
 
     if (message.channel.id === "864026396111667231") {
         if (message.author.bot) return;
@@ -19,13 +25,17 @@ client.on("message", function(message) {
         const command = args.shift().toLowerCase();
     
         if (command === "blobtime" && wallet >= blobCost) {
-            message.channel.send("OHH YAAA ITS BLOB TIME BAABBAYYYY!!");
             wallet -= 17;
+            db.update({_id: 'id1'}, {$set: {balance: wallet}}, {}, () => {
+                message.channel.send("OHH YAAA ITS BLOB TIME BAABBAYYYY!!");
+            });
         } else if (command === "blobtime" && wallet < blobCost) {
             message.channel.send("balance too low :c u broke!!");
         } else if (command === "swag" && message.author.id === "172205824876347392") {
             wallet += parseInt(args,10);
-            message.channel.send(`FRIK YEEAA U NOW HAVE ${wallet} DOLLAS $$$$ CHA CHING`);
+            db.update({_id: 'id1'}, {$set: {balance: wallet}}, {}, () => {
+                message.channel.send(`FRIK YEEAA U NOW HAVE ${wallet} DOLLAS $$$$ CHA CHING`);
+            });
         } else if (command === "swag") {
             message.channel.send("HEY!!!! U R NOT ALLOWED TO USE THAT >:(");
         } else if (command === "whenblob?") {
