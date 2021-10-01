@@ -19,6 +19,7 @@
   "homepage": "https://github.com/joshah98/discordbot#readme",
   "dependencies": {
     "discord.js": "^12.5.3",
+    "mongodb": "^4.1.2",
     "nedb": "^1.8.0"
   }
 }

@@ -5,16 +5,20 @@ const Datastore = require('nedb')
 
 const client = new Discord.Client();
 
+
+const { MongoClient } = require('mongodb');
+
+
 const prefix = "!";
 const blobCost = 17;
 
 
 client.on("message", function(message) {
     let wallet;
-
+    
     db.find({_id: 'id1'}, (err, docs) => {
         wallet = docs[0].balance;
-
+        
         if (message.channel.id === "864026396111667231") {
             if (message.author.bot) return;
             if (!message.content.startsWith(prefix)) return;
@@ -22,7 +26,7 @@ client.on("message", function(message) {
             const commandBody = message.content.slice(prefix.length);
             const args = commandBody.split(' ');
             const command = args.shift().toLowerCase();
-        
+            
             if (command === "blobtime" && wallet >= blobCost) {
                 wallet -= 17;
                 db.update({_id: 'id1'}, {$set: {balance: wallet}}, {}, () => {
@@ -50,7 +54,18 @@ client.on("message", function(message) {
                 message.channel.send("!whenblob?: use to find out the balance and figure out when the next blob is available");
                 message.channel.send("!commands: use when....wait....uhhhh");
             } else if (command === "debug") {
-                message.channel.send(docs[0].balance);
+                // message.channel.send(docs[0].balance);
+                const uri = `mongodb+srv://blobBotDB:${process.env.db}@cluster0.tmfds.mongodb.net/blobWallet?retryWrites=true&w=majority`;
+                const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+                client.connect(err => {
+                  const wallet = client.db("blobWallet").collection("wallet");
+                  wallet.find({"_id": ObjectId("615678e37c2a405fd09deea1")}, (err, res) => {
+                    if (err) throw err;
+                    message.channel.send(res.value);
+                  });
+                  client.close();
+                });
+                
             }
         }
     });
